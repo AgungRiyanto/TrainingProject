@@ -1,5 +1,5 @@
 import React, {useEffect, useState,useCallback} from 'react';
-import {View, StyleSheet, BackHandler, Text, Alert} from 'react-native';
+import {View, StyleSheet, BackHandler, Text, Alert, TouchableOpacity} from 'react-native';
 import {useFocusEffect} from '@react-navigation/native'
 
 const Login = ({navigation}) => {
@@ -35,6 +35,9 @@ const Login = ({navigation}) => {
    return (
       <View style={styles.container}>
          <Text>Login Screen</Text>
+         <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.buttonHome}>
+            <Text style={{color: 'white'}}>Go To Home</Text>
+         </TouchableOpacity>
       </View>
    );
 }
@@ -46,5 +49,10 @@ const styles = StyleSheet.create({
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
+   },
+   buttonHome: {
+      marginTop: 10,
+      backgroundColor: 'blue',
+      padding: 10
    }
 })
