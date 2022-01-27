@@ -6,6 +6,8 @@ import Splash from '../screens/Splash';
 import Login from '../screens/Login';
 import Home from '../screens/Home';
 import Detail from '../screens/Detail';
+import BottomNavigation from './BottomNavigation';
+import HomeStack from './HomeStack';
 
 
 const Stack = createNativeStackNavigator();
@@ -21,8 +23,8 @@ const RootNavigation = ({}) => {
          >
             <Stack.Screen name="Splash" component={Splash} />
             <Stack.Screen name="Login" component={Login} />
-            <Stack.Screen name="Home" component={Home} />
-            <Stack.Screen name="Detail" component={Detail} />
+            <Stack.Screen name="MainApp" component={BottomNavigation} />
+            <Stack.Screen name="HomeNavigation" component={HomeStack} />
          </Stack.Navigator>
       </NavigationContainer>
    );

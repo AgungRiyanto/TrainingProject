@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, StyleSheet, Image} from 'react-native';
+import {View, Text, StyleSheet, Image, ScrollView} from 'react-native';
 import axios from 'axios';
+import Header from '../components/Header';
 
 const Detail = ({navigation, route}) => {
    // props or params
@@ -9,34 +10,41 @@ const Detail = ({navigation, route}) => {
    //state
    const [detail, setDetail] = useState();
 
-   function getMovieDetail() {
-      axios.get(`https://www.episodate.com/api/show-details?q=${routeParams?.movieId}`
-      ).then((response) => {
-         console.log('response', response);
-         if (response.data) {
-            setDetail(response?.data?.tvShow)
-         }
+   function getDetailMovie() {
+      console.log('params', routeParams)
+      axios(`https://www.episodate.com/api/show-details?q=${routeParams.movieId}`)
+      .then((response) => {
+         console.log('response detail movie', response)
+         setDetail(response.data.tvShow);
+
       }).catch((err) => {
-         console.log('err', err);
+         console.log('err', err)
+
       })
    }
 
-   useEffect(() => {
-      getMovieDetail();
-   }, []);
+   useState(() => {
+      getDetailMovie();
+   }, [])
 
    return (
       <View style={styles.container}>
-         <Image
-            source={{uri: detail?.image_path}}
-            style={styles.movieImage}
-            resizeMode="cover"
+         <Header
+            headerTitle={detail?.name || 'Detail'}
+            onBack={() => navigation.goBack()}
          />
-         <View style={styles.content}>
-            <Text style={styles.movieTitle}>{detail?.name}</Text>
-            <Text>Country: {detail?.country}</Text>
-            <Text>{detail?.description}</Text>
-         </View>
+         <ScrollView showsVerticalScrollIndicator={false} >
+            <Image
+               source={{uri: detail?.image_path}}
+               style={styles.movieImage}
+               resizeMode="cover"
+            />
+            <View style={styles.content}>
+               <Text style={styles.movieTitle}>{detail?.name}</Text>
+               <Text>Country: {detail?.country}</Text>
+               <Text>{detail?.description}</Text>
+            </View>
+         </ScrollView>
       </View>
    )
 }

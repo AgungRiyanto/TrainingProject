@@ -16,6 +16,7 @@ import {
   Text,
   useColorScheme,
   View,
+  LogBox
 } from 'react-native';
 
 import {
@@ -72,6 +73,8 @@ const App: () => Node = () => {
     </SafeAreaView>
   );
 };
+
+LogBox.ignoreAllLogs();
 
 const styles = StyleSheet.create({
   sectionContainer: {

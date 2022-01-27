@@ -1,39 +1,75 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, StyleSheet, TouchableOpacity, FlatList, Image} from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity, FlatList, Image, ToastAndroid, ActivityIndicator} from 'react-native';
 import axios from 'axios';
+import Header from '../components/Header';
+import Placeholder from '../components/Placeholder';
 
-const Home = ({navigation}) => {
+const Home = ({navigation, route}) => {
+   console.log('route =', route);
+
    const [data, setData] = useState();
+   const [email, setEmail] = useState('');
+   const [loading, setLoading] = useState(false);
+   const [isLoadMore, setIsLoadMore] = useState(false);
 
-   function getMovieList() {
-      axios.get('https://www.episodate.com/api/most-popular?page=1'
-      ).then((response) => {
-         console.log('response', response);
-         if (response.data) {
-            setData(response?.data);
-         }
+   useEffect(() => {
+      // ToastAndroid.show(route?.params?.nama, ToastAndroid.LONG);
+      // setEmail(route?.params?.email);
+      getListTvShows();
+   }, []);
+
+   function getListTvShows() {
+      setLoading(true);
+      axios('https://www.episodate.com/api/most-popular?page=1')
+      .then((jsonResponse) => {
+         console.log('response using axios', jsonResponse);
+         setData(jsonResponse.data);
+         setLoading(false);
       }).catch((err) => {
          console.log('err', err);
+         // setLoading(false);
+
       })
    }
 
-   useEffect(() => {
-      getMovieList();
-   }, []);
+   function onLoadMore() {
+      const currentPage = data?.page;
+      const nextPage = currentPage + 1;
+      const lastPage = data?.pages;
+
+      if (nextPage <= lastPage && !isLoadMore) {
+         setIsLoadMore(true)
+         axios(`https://www.episodate.com/api/most-popular?page=${nextPage}`)
+         .then((jsonResponse) => {
+            console.log('response using axios', jsonResponse);
+            setData({
+               ...data,
+               ...jsonResponse.data,
+               tv_shows: data.tv_shows.concat(jsonResponse.data.tv_shows)
+            });
+            setIsLoadMore(false);
+         }).catch((err) => {
+            console.log('err', err);
+            setIsLoadMore(false);
+         })
+         
+      }
+   }
 
    console.log('data', data)
 
    return (
       <View style={styles.container}>
-         <Text>Home screen</Text>
-         {/* <TouchableOpacity onPress={() => navigation.navigate('Detail')} style={styles.buttonHome}>
-            <Text style={{color: 'white'}}>Go To Detail</Text>
-         </TouchableOpacity> */}
+         <Header
+            headerTitle="List Movie"
+         /> 
          <FlatList
             data={data?.tv_shows}
-            renderItem={({item})=> (
+            onEndReached={() => onLoadMore()}
+            onEndReachedThreshold={0.1}
+            renderItem={({item}) => (
                <TouchableOpacity 
-                  onPress={() => navigation.navigate('Detail', {movieId: item?.id})} 
+                  onPress={() => navigation.navigate('HomeNavigation', {screen: 'Detail', params: {movieId: item?.id}})} 
                   style={styles.movieCard}
                >
                   <View style={styles.row}>
@@ -47,9 +83,20 @@ const Home = ({navigation}) => {
                         <Text>Country: {item?.country}</Text>
                      </View>
                   </View>
-                 
                </TouchableOpacity>
             )}
+            ListEmptyComponent={
+               loading ? 
+               <Placeholder count={10} />
+               :
+               <Text>Data kosong</Text>
+            }
+            ListFooterComponent={
+               isLoadMore && 
+               <View style={{alignItems: 'center'}}>
+                  <ActivityIndicator color={"blue"} size="large" />
+               </View>
+            }
          />
       </View>
    )
@@ -66,6 +113,9 @@ const styles = StyleSheet.create({
    },
    row: {
       flexDirection: 'row'
+   },
+   justifyContent: {
+      justifyContent: 'space-between'
    },
    movieCard: {
       backgroundColor: 'white',
@@ -85,7 +135,8 @@ const styles = StyleSheet.create({
    },
    movieThumbnail: {
       width: 100,
-      height: 100
+      height: 100,
+      borderRadius: 10
    },
    movieTitle: {
       fontSize: 16,
