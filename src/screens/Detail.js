@@ -1,7 +1,8 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, StyleSheet, Image, ScrollView} from 'react-native';
+import {View, Text, StyleSheet, Image, ScrollView, ActivityIndicator, ImageBackground} from 'react-native';
 import axios from 'axios';
 import Header from '../components/Header';
+import { apiGetDetailMovie } from '../services/api';
 
 const Detail = ({navigation, route}) => {
    // props or params
@@ -9,18 +10,16 @@ const Detail = ({navigation, route}) => {
 
    //state
    const [detail, setDetail] = useState();
+   const [loading, setLoading] = useState(true);
 
-   function getDetailMovie() {
+   async function getDetailMovie() {
       console.log('params', routeParams)
-      axios(`https://www.episodate.com/api/show-details?q=${routeParams.movieId}`)
-      .then((response) => {
-         console.log('response detail movie', response)
-         setDetail(response.data.tvShow);
+      const response = await apiGetDetailMovie(routeParams?.movieId);
+      setLoading(false);
 
-      }).catch((err) => {
-         console.log('err', err)
-
-      })
+      if (response?.data) {
+         setDetail(response?.data?.tvShow);
+      }
    }
 
    useState(() => {
@@ -30,21 +29,30 @@ const Detail = ({navigation, route}) => {
    return (
       <View style={styles.container}>
          <Header
-            headerTitle={detail?.name || 'Detail'}
+            headerTitle={'Detail'}
             onBack={() => navigation.goBack()}
          />
-         <ScrollView showsVerticalScrollIndicator={false} >
-            <Image
-               source={{uri: detail?.image_path}}
-               style={styles.movieImage}
-               resizeMode="cover"
-            />
-            <View style={styles.content}>
-               <Text style={styles.movieTitle}>{detail?.name}</Text>
-               <Text>Country: {detail?.country}</Text>
-               <Text>{detail?.description}</Text>
+         {
+            loading ?
+            <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+               <ActivityIndicator color={"blue"} size={"large"} />
             </View>
-         </ScrollView>
+            :
+            <ScrollView showsVerticalScrollIndicator={false} >
+               <ImageBackground
+                  source={{uri: detail?.image_path}}
+                  style={styles.movieImage}
+                  resizeMode="cover"
+               >
+                  <Text style={styles.textTitleCenter}>{detail?.name}</Text>
+               </ImageBackground>
+               <View style={styles.content}>
+                  <Text style={styles.movieTitle}>{detail?.name}</Text>
+                  <Text>Country: {detail?.country}</Text>
+                  <Text>{detail?.description}</Text>
+               </View>
+            </ScrollView>
+         }
       </View>
    )
 }
@@ -55,12 +63,12 @@ const styles = StyleSheet.create({
    container: {
       flex: 1,
       backgroundColor: 'white'
-      // justifyContent: 'center',
-      // alignItems: 'center'
    },
    movieImage: {
       width: '100%',
-      height: 300
+      height: 400,
+      justifyContent: 'center',
+      alignItems: 'center'
    },
    content: {
       padding: 10,
@@ -68,6 +76,11 @@ const styles = StyleSheet.create({
    },
    movieTitle: {
       fontSize: 18,
+      fontWeight: 'bold'
+   },
+   textTitleCenter: {
+      color: 'white',
+      fontSize: 16,
       fontWeight: 'bold'
    }
 });

@@ -5,10 +5,8 @@ const Splash = ({navigation}) => {
    const [textShow] = useState(new Animated.Value(-20));
 
    useEffect(() => {
-      // timers
-      
       Animated.timing(textShow, {
-         toValue: 500,
+         toValue: 400,
          duration: 2000,
       }).start()
 
@@ -22,10 +20,10 @@ const Splash = ({navigation}) => {
          <Animated.Text
             style={{
                position: 'absolute',
-               top: textShow
+               bottom: textShow
             }}
          >
-            Hello Splash
+            Hello from Splash
          </Animated.Text>
       </View>
    )

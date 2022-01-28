@@ -15,9 +15,9 @@ export default function BottomNavigation() {
       <Tab.Navigator 
          screenOptions={({route}) => ({
             headerShown: false,
-            tabBarActiveBackgroundColor: 'blue',
+            tabBarActiveBackgroundColor: 'white',
             tabBarShowLabel: true,
-            tabBarLabelStyle: {fontSize: 14, fontWeight: 'bold'},
+            tabBarLabelStyle: {fontSize: 12},
             tabBarIcon: ({focused, color, size}) => {
                let iconName;
 
@@ -29,9 +29,9 @@ export default function BottomNavigation() {
                   iconName = "book";
                }
 
-               return <AntDesign color={focused ? "white":"gray" } name={iconName} size={30} />
+               return <AntDesign color={focused ? "blue":"gray" } name={iconName} size={focused ? 27:20} />
             },
-            tabBarActiveTintColor: 'white',
+            tabBarActiveTintColor: 'blue',
             tabBarInactiveTintColor: 'gray',
          })}
       >

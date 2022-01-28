@@ -20,13 +20,15 @@ export default Header;
 
 const styles = StyleSheet.create({
    container: {
-      padding: 10,
+      paddingHorizontal: 10,
+      paddingVertical: 13,
       backgroundColor: 'blue',
       flexDirection: 'row'
    },
    headerTitle: {
       fontSize: 16,
       color: 'white',
-      marginLeft: 10
+      marginLeft: 10,
+      fontWeight: 'bold'
    }
 })

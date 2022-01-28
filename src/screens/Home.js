@@ -1,68 +1,82 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, StyleSheet, TouchableOpacity, FlatList, Image, ToastAndroid, ActivityIndicator} from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity, FlatList, Image, ToastAndroid, ActivityIndicator, TextInput} from 'react-native';
 import axios from 'axios';
 import Header from '../components/Header';
 import Placeholder from '../components/Placeholder';
+import {apiGetListTvShows, apiSearchMovie} from '../services/api';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 
 const Home = ({navigation, route}) => {
-   console.log('route =', route);
 
    const [data, setData] = useState();
-   const [email, setEmail] = useState('');
+   const [keyword, setKeyword] = useState('');
    const [loading, setLoading] = useState(false);
    const [isLoadMore, setIsLoadMore] = useState(false);
 
    useEffect(() => {
-      // ToastAndroid.show(route?.params?.nama, ToastAndroid.LONG);
-      // setEmail(route?.params?.email);
-      getListTvShows();
-   }, []);
+      if (keyword && keyword.length >= 3) {
+         onSearchMovie();
+      } else {
+         getListTvShows();
+      }
+   }, [keyword]);
 
-   function getListTvShows() {
+
+   async function getListTvShows() {
       setLoading(true);
-      axios('https://www.episodate.com/api/most-popular?page=1')
-      .then((jsonResponse) => {
-         console.log('response using axios', jsonResponse);
-         setData(jsonResponse.data);
-         setLoading(false);
-      }).catch((err) => {
-         console.log('err', err);
-         // setLoading(false);
+      const response = await apiGetListTvShows(1);
+      setLoading(false)
 
-      })
+      if (response.data) {
+         setData(response.data);
+      } 
    }
 
-   function onLoadMore() {
+   async function onSearchMovie() {
+      setLoading(true);
+      const response = await apiSearchMovie(keyword, 1);
+      setLoading(false);
+      
+      if (response.data) {
+         setData(response.data);
+      } 
+   }
+
+   async function onLoadMore() {
       const currentPage = data?.page;
       const nextPage = currentPage + 1;
       const lastPage = data?.pages;
 
       if (nextPage <= lastPage && !isLoadMore) {
          setIsLoadMore(true)
-         axios(`https://www.episodate.com/api/most-popular?page=${nextPage}`)
-         .then((jsonResponse) => {
-            console.log('response using axios', jsonResponse);
+         const response = await apiGetListTvShows(nextPage);
+
+         if (response.data) {
             setData({
                ...data,
-               ...jsonResponse.data,
-               tv_shows: data.tv_shows.concat(jsonResponse.data.tv_shows)
+               ...response.data,
+               tv_shows: data.tv_shows.concat(response.data.tv_shows)
             });
             setIsLoadMore(false);
-         }).catch((err) => {
-            console.log('err', err);
-            setIsLoadMore(false);
-         })
+         }
          
       }
    }
-
-   console.log('data', data)
 
    return (
       <View style={styles.container}>
          <Header
             headerTitle="List Movie"
          /> 
+         <View style={[styles.row, styles.searchInput]}>
+            <TextInput
+               placeholder='Search Movie...'
+               style={{paddingVertical: 0}}
+               value={keyword}
+               onChangeText={(text) => setKeyword(text)}
+            />
+            <AntDesign name="search1" size={20} color="gray" />
+         </View>
          <FlatList
             data={data?.tv_shows}
             onEndReached={() => onLoadMore()}
@@ -108,14 +122,23 @@ const styles = StyleSheet.create({
    container: {
       flex: 1,
       backgroundColor: 'white'
-      // justifyContent: 'center',
-      // alignItems: 'center'
    },
    row: {
       flexDirection: 'row'
    },
    justifyContent: {
       justifyContent: 'space-between'
+   },
+   searchInput: {
+      borderWidth: 1,
+      borderColor: 'gray',
+      marginHorizontal: 13,
+      marginTop: 10,
+      paddingVertical: 5,
+      borderRadius: 5,
+      justifyContent: 'space-between',
+      paddingHorizontal: 10,
+      alignItems: 'center'
    },
    movieCard: {
       backgroundColor: 'white',

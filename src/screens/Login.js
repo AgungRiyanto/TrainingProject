@@ -8,11 +8,13 @@ import {
    ToastAndroid,
    Alert,
    BackHandler, 
-   ActivityIndicator
+   ActivityIndicator,
+   Platform
 } from "react-native";
 import {useFocusEffect} from '@react-navigation/native'
 import InputText from '../components/TextInput';
 import axios from 'axios';
+import Button from '../components/Button';
 
 const Login = ({navigation, route}) => {
 
@@ -29,19 +31,9 @@ const Login = ({navigation, route}) => {
          "Warning",
          "Email atau password belum diisi",
          [
-         //   {
-         //     text: "Cancel",
-         //     onPress: () => console.log("Cancel Pressed"),
-         //     style: "cancel"
-         //   },
            { text: "OK", onPress: () => console.log("OK Pressed") },
          ]
        );
-   }
-
-   function showConsoleLog() {
-      console.log('email =', email);
-      console.log('props =', props);
    }
 
    // backhandlers
@@ -54,7 +46,6 @@ const Login = ({navigation, route}) => {
 						onPress: () => null,
 						style: "cancel"
 					},
-					// { text: "Ya", onPress: () => navigation.dispatch(StackActions.replace('Main')) }
 					{ 
 						text: "Ya", 
                   onPress: () => BackHandler.exitApp()
@@ -80,29 +71,18 @@ const Login = ({navigation, route}) => {
          setLoading(false);
          showToastAndroid();
          navigation.navigate('MainApp', {
-            email
+            email,
          });
       }, 3000);
    }
-
-   function userSignIn() {
-      const data = {email, password}
-      axios.post('url', data, {
-         headers: {
-            "Authorization": 'token',
-            "Content-Type":"application/json"
-         }
-      }).then((response) => {
-
-      }).catch((err) => {
-
-      })
-   }
    
-
    return (
       <View style={styles.container}>
-         <Text style={styles.textLogin}>Login</Text>
+         {
+            Platform.OS === "android" ? 
+            <Text style={styles.textLogin}>Login Android</Text>:
+            <Text style={styles.textLogin}>Login Ios</Text>
+         }
          <InputText
             placeholder="Email"
             value={email}
@@ -111,26 +91,17 @@ const Login = ({navigation, route}) => {
             }}
          />
          <InputText
-            placeholder="Passwrod"
+            placeholder="Password"
             value={password}
             onChangeText={(text) => {
                setPassword(text)
             }}
             secureTextEntry={true}
          />
-         {/* <TextInput 
-            style={styles.textInput} 
-            placeholder="Masukan Password anda"
-            placeholderTextColor="grey"
-            value={password}
-            onChangeText={(text) => {
-               setPassword(text)
-            }}
-         /> */}
-         <TouchableOpacity onPress={() => navigateToHome()} style={styles.button}>
-            <Text style={styles.textButton}>Login</Text>
-            {loading && <ActivityIndicator color="white" />}
-         </TouchableOpacity>
+         <Button
+            onPress={() => navigateToHome()}
+            loading={loading}
+         />
       </View>
    );
 }
@@ -141,7 +112,16 @@ const styles = StyleSheet.create({
    container: {
       flex: 1,
       alignItems: 'center',
-      justifyContent: 'center'
+      justifyContent: 'center',
+      ...Platform.select({
+         ios: {
+            padding: 10
+         },
+         android: {
+            padding: 12
+         }
+         
+      })
    },
    textLogin: {
       fontSize: 16,
